@@ -62,7 +62,6 @@ class Interpolate(object):
         partition = []
         first_pair = True
         for left_pair, right_pair in pairwise(filter(lambda pair: pair is not None, self.__ring)):
-            print(repr(left_pair) + " / " + repr(right_pair))
             left_index, left_element = left_pair
             right_index, right_element = right_pair
             
@@ -105,11 +104,10 @@ class Interpolate(object):
             return all(map(lambda pair: pair[1] is not None, partition))
         
         partitions = self.__partition_ring()
-        print(partitions)
-
+        
         # We should do something because it seems that we can interpolate, dude! 
         if len(partitions) == 3:
-            assert len(partitions[0]) == self.__before_size
+            assert len(partitions[0]) >= self.__before_size
             assert len(partitions[1]) <= self.__interpolatable_size
             assert len(partitions[2]) == self.__after_size
             
@@ -131,7 +129,6 @@ class Interpolate(object):
                 for pair in partitions[1]:
                     self.__ring.add(pair)
             else:
-                print(partitions)
                 raise ValueError()# We should not be here... I guess. 
         elif len(partitions) == 1:
             if all_none(partitions[0]): # We're fucked anyway.
