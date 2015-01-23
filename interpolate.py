@@ -39,6 +39,10 @@ class Ring(object):
 
     def __repr__(self):
         return repr(self.__deque)
+
+    def add_all(self, elements):
+        for element in elements:
+            self.add(element)
     
 class Interpolate(object):
 
@@ -89,11 +93,12 @@ class Interpolate(object):
             def f(x):
                 return (x_b - x) / (x_b - x_a) * y_a + (x - x_a) / (x_b - x_a) * y_b
             return f
-        a = pairs[self.__before_size - 1]
-        b = pairs[len(pairs) - (self.__after_size - 1) - 1]
+        before, between, after = self.__partition_ring()
+        a = before[-1]
+        b = after[0]
         f = linear_interpolator(a, b)
         
-        return [a] + [(x, f(x)) for x in map(lambda pair: pair[0], pairs[self.__before_size:len(pairs) - (self.__after_size - 1) - 1])] + [b]
+        return before + [(x, f(x)) for x in map(lambda pair: pair[0], between)] + after
     
     def __iterate(self):
         
@@ -110,11 +115,11 @@ class Interpolate(object):
             assert len(partitions[0]) >= self.__before_size
             assert len(partitions[1]) <= self.__interpolatable_size
             assert len(partitions[2]) == self.__after_size
-            
             interpolated = self.__interpolate([pair for partition in partitions for pair in partition])
-            for pair in interpolated[self.__before_size:len(interpolated)]:
+            for pair in interpolated[len(partitions[0]):len(interpolated)]:
                 yield pair
             self.__ring.clear()
+            self.__ring.add_all(partitions[2])
         elif len(partitions) == 2:
             if all_not_none(partitions[0]) and all_none(partitions[1]):
                 if len(partitions[1]) > self.__interpolatable_size: 
