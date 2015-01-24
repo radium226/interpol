@@ -1,6 +1,6 @@
 #!/bin/env python
 
-from interpolate import Interpolate
+from .interpolate import Interpolate
 import sys
 
 def iterate_stdin():
