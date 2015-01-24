@@ -9,12 +9,25 @@ Tiny module which can interpolate an iterator on the fly with linear interpolati
 ## Example
 Run :
 ```
-cat <<EOCAT | python -m "interpol" 
+while true; do cat <<EOCAT; sleep 1 ; done | python -m interpol
 1
 2
 
 4
+5
+6
+7
+
+
+
+10
+9
+8
+
+
+
 EOCAT
+
 ```
 
 ## Install
