@@ -5,3 +5,6 @@ Tiny module which can interpolate an iterator on the fly with linear interpolati
  - [ ] Refactor `Interpolate.__call__` directly into a function
  - [ ] Replace `all_none` by an external `is_missing` function
  - [ ] Handle any kind of data by putting the interpolator function elsewhere
+
+## Install
+You can install the package directly from Github: `pip install git+git://github.com/radium226/interpol.git`.
