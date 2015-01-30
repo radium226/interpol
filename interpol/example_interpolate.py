@@ -36,7 +36,7 @@ def sample(size):
     def f(x):
         return x * cos(x)
 
-    return list(enumerate(map(lambda y: None if random_int(0, 2) == 0 else y,[f(x / 10) for x in range(- size // 2, size // 2)])))
+    return list(enumerate(map(lambda y: None if random_int(0, 3) == 0 else y,[f(x / 10) for x in range(- size // 2, size // 2)])))
 
 
 def write_data(fd, data, label):

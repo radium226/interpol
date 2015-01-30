@@ -87,18 +87,27 @@ class Interpolate(object):
         return partitions
     
     def __interpolate(self, pairs):
-        def linear_interpolator(a, b):
-            x_a, y_a = a
-            x_b, y_b = b
-            def f(x):
-                return (x_b - x) / (x_b - x_a) * y_a + (x - x_a) / (x_b - x_a) * y_b
-            return f
+        #def linear_interpolator(a, b):
+        #    x_a, y_a = a
+        #    x_b, y_b = b
+        #    def f(x):
+        #        return (x_b - x) / (x_b - x_a) * y_a + (x - x_a) / (x_b - x_a) * y_b
+        #    return f
         before, between, after = self.__partition_ring()
-        a = before[-1]
-        b = after[0]
-        f = linear_interpolator(a, b)
+        #print(before)
+        #print(between)
+        #print(after)
+        #a = before[-1]
+        #b = after[0]
+        #f = linear_interpolator(a, b)
+        from scipy.interpolate import InterpolatedUnivariateSpline
+        known_x = list(map(lambda p: p[0], before + after))
+        known_y = list(map(lambda p: p[1], before + after))
+        #print(x)
+        #print(y)
+        interpolator = InterpolatedUnivariateSpline(known_x, known_y, k=min(5, (len(before) + len(after)) // 2))
         
-        return before + [(x, f(x)) for x in map(lambda pair: pair[0], between)] + after
+        return before + [(x, interpolator(x).item()) for x in map(lambda pair: pair[0], between)] + after
     
     def __iterate(self):
         
@@ -112,14 +121,22 @@ class Interpolate(object):
         
         # We should do something because it seems that we can interpolate, dude! 
         if len(partitions) == 3:
-            assert len(partitions[0]) >= self.__before_size
-            assert len(partitions[1]) <= self.__interpolatable_size
-            assert len(partitions[2]) == self.__after_size
-            interpolated = self.__interpolate([pair for partition in partitions for pair in partition])
-            for pair in interpolated[len(partitions[0]):len(interpolated)]:
-                yield pair
-            self.__ring.clear()
-            self.__ring.add_all(partitions[2])
+            if len(partitions[0]) >= self.__before_size:
+                assert len(partitions[1]) <= self.__interpolatable_size
+                if len(partitions[2]) == self.__after_size:
+                    interpolated = self.__interpolate([pair for partition in partitions for pair in partition])
+                    for pair in interpolated[len(partitions[0]):len(interpolated)]:
+                        yield pair
+                    self.__ring.clear()
+                    self.__ring.add_all(partitions[2])
+                elif len(partitions[2]) < self.__after_size:
+                    pass #We wait...
+                else:
+                    raise ValueError()# We should not be here because of the ring size
+            else: # we waited too much for something
+                yield from partitions[0] + partitions[1]
+                self.__ring.clear()
+                self.__ring.add_all(partitions[2])
         elif len(partitions) == 2:
             if all_not_none(partitions[0]) and all_none(partitions[1]):
                 if len(partitions[1]) > self.__interpolatable_size: 
@@ -154,6 +171,6 @@ class Interpolate(object):
             yield from partitions[-1]
 
 if __name__ == "__main__":
+    data = [(1, 1), (2, 4), (3, None), (4, None), (5, 10), (6, 12)]
     interpolate = Interpolate(before_size=1, interpolatable_size=3, after_size=1)
-    for index, value in interpolate(weird_range(50, 70)):
-        print("%(index)i = %(value)s" % {"index": index, "value": str(value) if value is not None else "None"})
+    print(list(interpolate(data)))
