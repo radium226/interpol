@@ -1,6 +1,6 @@
 language: python
 python:
-  - "3.4_with_system_site_packages"
+  - "3.2_with_system_site_packages"
 before_install:
   - "sudo apt-get install -qq python-numpy python-scipy"
 install:
