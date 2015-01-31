@@ -1,7 +1,7 @@
 #!/bin/env python
 
 from nose.tools import assert_equals
-from interpolate import Interpolate
+from interpol import Interpolate
 
 import random
 random.seed()
