@@ -3,7 +3,7 @@ python:
   - "3.4"
 before_install:
   - "sudo apt-get install -qq python-numpy python-scipy"
-install:
+#install:
 #  - "pip install ."
 #  - "pip install -r requirements.txt"
 script: PYTHONPATH="${PYTHONPATH}:interpol" nosetests
