@@ -2,7 +2,8 @@
 
 from collections import deque as Deque
 import itertools
-    
+from scipy.interpolate import InterpolatedUnivariateSpline
+ 
 # https://github.com/tyarkoni/transitions
 
 def pairwise(iterable):
@@ -100,7 +101,6 @@ class Interpolate(object):
         #a = before[-1]
         #b = after[0]
         #f = linear_interpolator(a, b)
-        from scipy.interpolate import InterpolatedUnivariateSpline
         known_x = list(map(lambda p: p[0], before + after))
         known_y = list(map(lambda p: p[1], before + after))
         #print(x)
