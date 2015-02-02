@@ -9,6 +9,9 @@ setup(
         url="https://github.com/radium226/interpol", 
         license="GPL", 
         packages=["interpol"], 
-        zip_safe=True
+        zip_safe=True, 
+        install_requires=[
+            "scipy"
+        ]
     )
 
