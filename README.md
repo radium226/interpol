@@ -1,4 +1,4 @@
-# interpolate.py [![Build Status](https://travis-ci.org/radium226/interpol.svg?branch=master)](https://travis-ci.org/radium226/interpol)
+# interpolate.py [![Build Status](https://travis-ci.org/radium226/interpol.svg?branch=master)](https://travis-ci.org/radium226/interpol) [![Coverage Status](https://coveralls.io/repos/radium226/interpol/badge.svg)](https://coveralls.io/r/radium226/interpol)
 Tiny module which can interpolate an iterator on the fly with linear interpolation. 
 ![example of interpolation](https://raw.github.com/radium226/interpol/master/interpol/example_interpolate.png)
  - [ ] Use Scipy interpolators
