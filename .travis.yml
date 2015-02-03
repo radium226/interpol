@@ -20,5 +20,7 @@ install:
 script: nosetests --with-coverage --cover-package interpol
 #script: python -c "import scipy; print(scipy.version.version)"
 after_success:
-  coveralls 
+  - which nostests
+  - find / -name "coveralls" 2>/dev/null
+  - coveralls 
 
