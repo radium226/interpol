@@ -20,5 +20,6 @@ install:
 script: python -m nose --with-coverage --cover-package interpol
 #script: python -c "import scipy; print(scipy.version.version)"
 after_success:
-  python -m coveralls 
+  - chmod +x "./coveralls.py"
+  - python "./coveralls.py" 
 
