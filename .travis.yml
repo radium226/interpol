@@ -14,7 +14,7 @@ before_install:
 install:
   - conda install --yes -c conda conda-env
   - conda create -n testenv --yes scipy pip nose coverage python=$TRAVIS_PYTHON_VERSION
-  - conda install -c https://conda.binstar.org/omnia python-coveralls
+  - conda install  --yes -c https://conda.binstar.org/omnia python-coveralls
   - source activate testenv
   - python setup.py install
 script: nosetests --with-coverage --cover-package interpol
