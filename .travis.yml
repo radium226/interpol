@@ -20,7 +20,7 @@ install:
 script: nosetests --with-coverage --cover-package interpol
 #script: python -c "import scipy; print(scipy.version.version)"
 after_success:
-  - which nostests
-  - find / -name "coveralls" 2>/dev/null
+  - which nosetests
+  - export PATH=/home/travis/miniconda3/bin:$PATH
   - coveralls 
 
