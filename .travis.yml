@@ -16,6 +16,6 @@ install:
   - conda create -n testenv --yes scipy pip python=$TRAVIS_PYTHON_VERSION
   - source activate testenv
   - python setup.py install
-script: nosetests 
+script: python -m nose
 #script: python -c "import scipy; print(scipy.version.version)"
 
