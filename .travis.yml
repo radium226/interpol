@@ -20,5 +20,5 @@ install:
 script: nosetests --with-coverage --cover-package interpol
 #script: python -c "import scipy; print(scipy.version.version)"
 after_success:
-  coveralls
+  python -m coveralls 
 
