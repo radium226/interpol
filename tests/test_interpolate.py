@@ -9,6 +9,8 @@ random.seed()
 def assert_iterator_equals(left, right):
     left_list = list(left)
     right_list = list(right)
+    print(left_list)
+    print(right_list)
     assert len(left_list) == len(right_list)
     assert all(map(lambda pair: pair[0] == pair[1], zip(left_list, right_list)))
 
@@ -47,12 +49,12 @@ class TestInterpolate(object):
     # We recreate a new Interpolate object each time
     def setup(self):
         self.interpolate = Interpolate(1, 5, 1)
-    
+
     # Test that no exception is raised
     def test_exception_not_raised(self):
         for sample in [random_sample() for _ in range(0, 100)]:
             yield self.assert_exception_not_raised, sample
-    
+
     # Test interpolation on only one partition
     def test_interpolate_one_partition(self):
         samples = [
@@ -74,6 +76,12 @@ class TestInterpolate(object):
                 self.interpolate(enumerate([None] * 10 + [11])), 
                 enumerate([None] * 10 + [11])
             )
+ 
+    def test_interpolate_two_partitions_3(self):
+        assert_iterator_equals(
+                Interpolate(2, 3, 2)(enumerate([1] + [None] * 10 + [2, 3, 4, 5] + [None] * 5 + [6, 7, 8, 9])), 
+                enumerate([1] + [None] * 10 + [2, 3, 4, 5]+ [None] * 5 + [6, 7, 8, 9])
+            )
 
     def test_interpolate_three_partitions_1(self):
         assert_iterator_equals(
@@ -85,4 +93,16 @@ class TestInterpolate(object):
         assert_iterator_equals(
                 self.interpolate(list_enumerate(None, 2, None)), 
                 list_enumerate(None, 2, None)
+            )
+    
+    def test_interpolate_three_partitions_3(self):
+        assert_iterator_equals(
+                self.interpolate(list_enumerate(1, 2, 3, 4, None, 6)), 
+                list_enumerate(1, 2, 3, 4, 5, 6)
+            )
+    
+    def test_interpolate_three_partitions_3(self):
+        assert_iterator_equals(
+                Interpolate(3, 3, 3)(list_enumerate(1, 2, 3, None, None, None, 7, None, 8)), 
+                list_enumerate(1, 2, 3, None, None, None, 7, None, 8)
             )
