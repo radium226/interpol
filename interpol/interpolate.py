@@ -132,7 +132,7 @@ class Interpolate(object):
                 elif len(partitions[2]) < self.__after_size:
                     pass #We wait...
                 else:
-                    raise ValueError()# We should not be here because of the ring size
+                    raise AssertionError()# We should not be here because of the ring size
             else: # we waited too much for something
                 yield from partitions[0] + partitions[1]
                 self.__ring.clear()
