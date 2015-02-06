@@ -82,6 +82,12 @@ class TestInterpolate(object):
                 Interpolate(2, 3, 2)(enumerate([1] + [None] * 10 + [2, 3, 4, 5] + [None] * 5 + [6, 7, 8, 9])), 
                 enumerate([1] + [None] * 10 + [2, 3, 4, 5]+ [None] * 5 + [6, 7, 8, 9])
             )
+    
+    def test_interpolate_two_partitions_4(self):
+        assert_iterator_equals(
+                Interpolate(2, 3, 2)(enumerate([1, 2] + [None] * 10 + [3, 4, 5, 6])), 
+                enumerate([1, 2] + [None] * 10 + [3, 4, 5, 6])
+            )
 
     def test_interpolate_three_partitions_1(self):
         assert_iterator_equals(
@@ -105,4 +111,10 @@ class TestInterpolate(object):
         assert_iterator_equals(
                 Interpolate(3, 3, 3)(list_enumerate(1, 2, 3, None, None, None, 7, None, 8)), 
                 list_enumerate(1, 2, 3, None, None, None, 7, None, 8)
+            )
+            
+    def test_interpolate_three_partitions_4(self):
+        assert_iterator_equals(
+                Interpolate(2, 3, 2)(enumerate([1, 2, None, None, 5, None, 7, 8, None, 10, 11, None])), 
+                enumerate([1, 2, None, None, 5, None, 7, 8, 9, 10, 11, None])
             )
