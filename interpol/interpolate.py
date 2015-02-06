@@ -10,10 +10,6 @@ def pairwise(iterable):
     a, b = itertools.tee(iterable)
     next(b, None)
     return zip(a, b)
-
-def weird_range(min, max):
-    for index, element in enumerate(range(min, max +1)):
-        yield (index, None if (min + 5) < element and element < (max - 5) else element)
     
 class Ring(object):
 
@@ -167,10 +163,10 @@ class Interpolate(object):
             yield from self.__iterate()
         
         partitions = self.__partition_ring()
-        if len(partitions) > 0 and all(map(lambda pair: pair[1] is None, partitions[-1])):
-            yield from partitions[-1]
-
-if __name__ == "__main__":
-    data = [(1, 1), (2, 4), (3, None), (4, None), (5, 10), (6, 12)]
-    interpolate = Interpolate(before_size=1, interpolatable_size=3, after_size=1)
-    print(list(interpolate(data)))
+        flush = False
+        for partition in partitions:
+            if all(map(lambda pair: pair[1] is None, partition)):
+                flush = True
+            if flush:
+                yield from partition
+        
