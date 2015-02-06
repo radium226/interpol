@@ -147,7 +147,7 @@ class Interpolate(object):
                 for pair in partitions[1]:
                     self.__ring.add(pair)
             else:
-                raise ValueError()# We should not be here... I guess. 
+                raise AssertionError()# We should not be here... I guess. 
         elif len(partitions) == 1:
             if all_none(partitions[0]): # We're fucked anyway.
                 yield from partitions[0]
