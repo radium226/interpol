@@ -4,30 +4,6 @@ from collections import deque as Deque
 from enum import Enum
 from itertools import tee
 
-def pairwise(iterable):
-    a, b = tee(iterable)
-    next(b, None)
-    return zip(a, b)
-
-def partition(iterator, boundary_matcher):
-    if boundary_matcher is None:
-        yield list(iterator)
-    else:
-        partition = []
-        for index, left_and_right_items in enumerate(pairwise(iterator)):
-            left_item, right_item = left_and_right_items
-            # Deal with first partition
-            if index == 0:
-                partition.append(left_item)
-            if boundary_matcher(left_item, right_item):
-                yield partition
-                partition = []
-            partition.append(right_item)
-        
-        # Deal with last partition
-        if partition:
-            yield partition
-            
 class PartitionedRing(object):
 
     def __init__(self, partitions=None, items=None, boundary=None):
@@ -82,24 +58,3 @@ class PartitionedRing(object):
     def partitions(self):
         return self.__partitions
 
-if __name__ == "__main__":
-    def append_to_ring(ring, item):
-        i = ring.append(item)
-        print(repr(ring) + " <---> " + repr(i))
-        return i
-    
-    ring = PartitionedRing(items=5, partitions=2, boundary=lambda r, l: r is None and l is not None or r is not None and l is None)
-    append_to_ring(ring, 1)
-    append_to_ring(ring, 2)
-    append_to_ring(ring, 3)
-    append_to_ring(ring, 4)
-    append_to_ring(ring, 5)
-    append_to_ring(ring, None)
-    append_to_ring(ring, None)
-    append_to_ring(ring, None)
-    append_to_ring(ring, None)
-    append_to_ring(ring, None)
-    append_to_ring(ring, 12)
-    
-    ring.remove_partition(1)
-    print(ring)
