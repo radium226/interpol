@@ -9,10 +9,19 @@ from .ring import PartitionedRing
 
 class Interpolate(object):
 
-    def __init__(self, interpolable_max_length):
-        self.__ring = PartitionedRing(items=2 + 2 + interpolable_max_length, partitions=3, boundary=lambda left, right: left is None and right is not None or left is not None and right is None)
-        self.__interpolable_max_length = interpolable_max_length
-        self.__startup_min_length = 2
+    def __init__(self, min_present_item_count=2, max_absent_item_count=4, absent_item_matcher=lambda item: item is None):
+        self.__min_present_item_count = min_present_item_count
+        self.__max_absent_item_count = max_absent_item_count
+        self.__is_item_absent = absent_item_matcher
+        
+        self.__ring = PartitionedRing(max_partition_count=3, max_item_count=2 * min_present_item_count + max_absent_item_count, boundary_matcher=self.__is_item_boundary)
+    
+    def __is_item_boundary(self, left_item, right_item):
+        return self.__is_item_absent(left_item) and not self.__is_item_absent(right_item) or not self.__is_item_absent(left_item) and self.__is_item_absent(right_item)
+    
+    def __are_items_absent(self, items):
+        return all(map(lambda item: self.__is_item_absent(item), items))
+    
     def __interpolate(self, pairs):
         #def linear_interpolator(a, b):
         #    x_a, y_a = a
@@ -35,51 +44,55 @@ class Interpolate(object):
         
         return before + [(x, interpolator(x).item()) for x in map(lambda pair: pair[0], between)] + after
     
+    @property
+    def __partitions(self):
+        return self.__ring.partitions
+    
     def __iterate(self, appened_item, maybe_ejected):
-        def is_absent(item):
-            return item is None
-
-        def is_present(item):
-            return item is not None
-
-        def all_absent(partition):
-            return all(map(lambda pair: pair is None, partition))
-
-        def all_present(partition):
-            return all(map(lambda pair: pair is not None, partition))
-
-        if maybe_ejected.is_something():
-            either_ejected = maybe_ejected.value
-            if either_ejected.is_left():  # item
-                ejected_item = either_ejected.value
-            elif either_ejected.is_right():
-                ejected_partition = either_ejected.value
+        print("appened_item=" + repr(appened_item) + "\t\tmaybe_ejected=" + repr(maybe_ejected) + "\t\tpartitions = " + repr(self.__partitions))
+         # We should do something because it seems that we can interpolate, dude! 
+        if len(partitions) == 3:
+            if len(partitions[0]) >= self.__before_size:
+                assert len(partitions[1]) <= self.__interpolatable_size
+                if len(partitions[2]) == self.__after_size:
+                    interpolated = self.__interpolate([pair for partition in partitions for pair in partition])
+                    for pair in interpolated[len(partitions[0]):len(interpolated)]:
+                        yield pair
+                    self.__ring.clear()
+                    self.__ring.add_all(partitions[2])
+                elif len(partitions[2]) < self.__after_size:
+                    pass #We wait...
+                else:
+                    raise AssertionError()# We should not be here because of the ring size
+            else: # we waited too much for something
+                yield from partitions[0] + partitions[1]
+                self.__ring.clear()
+                self.__ring.add_all(partitions[2])
+        elif len(partitions) == 2:
+            if all_not_none(partitions[0]) and all_none(partitions[1]):
+                if len(partitions[1]) > self.__interpolatable_size: 
+                    # We give up :(
+                    yield from partitions[1]
+                    self.__ring.clear()
+                else:
+                    pass # Continue, dude! 
+            elif all_none(partitions[0]) and all_not_none(partitions[1]):
+                yield from partitions[0]
+                self.__ring.clear()
+                for pair in partitions[1]:
+                    self.__ring.add(pair)
             else:
-                raise AssertionError
-
-        if len(self.__ring.partitions) == 1:
-            (single_partition) = self.__ring.partitions
-            if maybe_ejected.is_nothing():
-                if all_absent(single_partition):
-                    yield appened_item # We are fucked anyway
-                elif all_present(single_partition):
-                    yield appened_item # Let's go on
-                else:
-                    raise AssertionError
-            elif maybe_ejected.is_something():
-                either_ejected = maybe_ejected.value
-                if either_ejected.is_left():
-                    ejected_item = either_ejected.value
-                    yield appened_item # We are continuing a serie of ongoing absent / present item
-                else:
-                    ejected_partition = maybe_ejected.value
+                raise AssertionError()# We should not be here... I guess. 
+        elif len(self.__partitions) == 1:
+            partition = self.__ring.partitions[0]
+            if self.__are_items_absent(partition): # We're fucked anyway.
+                yield from partition
+                self.__ring.clear()
+            else:
+                if not self.__is_item_absent(appened_item):
                     yield appened_item
-                        
         else:
             raise AssertionError
-
-
-        
     
     def __call__(self, iterator):
         for item in iterator:

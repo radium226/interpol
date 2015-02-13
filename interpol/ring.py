@@ -5,13 +5,13 @@ from enum import Enum
 from itertools import tee
 from .either import Left, Right, Nothing, Something
 
-
 class PartitionedRing(object):
 
-    def __init__(self, partitions=None, items=None, boundary=None):
-        self.__partitions = Deque(maxlen=partitions)
-        self.__boundary = boundary
-        self.__max_length = items
+    def __init__(self, max_partition_count=None, max_item_count=None, boundary_matcher=None):
+        self.__max_partition_count = max_partition_count
+        self.__partitions = Deque(maxlen=max_partition_count)
+        self.__is_item_boundary = boundary_matcher
+        self.__max_item_count = max_item_count
     
     def __iter__(self):
         for partition in self.__partitions:
@@ -20,6 +20,10 @@ class PartitionedRing(object):
     def last_appened():
         return self.__partitions[-1][-1]
     
+    def append_all(self, items):
+        for item in items:
+            self.append(item)
+    
     def append(self, item):
         maybe = Nothing()
         if len(self.__partitions) == 0:
@@ -27,12 +31,14 @@ class PartitionedRing(object):
         else:
             last_partition = self.__partitions[-1]
             last_item = last_partition[-1]
-            if self.__boundary(last_item, item):
+            if self.__is_item_boundary(last_item, item):
+                if len(self.__partitions) == self.__max_partition_count:
+                    maybe = Something(Right(self.__partitions[0]))
                 self.__partitions.append([item])
             else:
                 last_partition.append(item)
         
-            if len(self) > self.__max_length:
+            if len(self) > self.__max_item_count:
                 maybe = Something(Left(self.__partitions[0][0]))
                 self.__partitions[0] = self.__partitions[0][1:]
             
