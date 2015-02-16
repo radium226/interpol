@@ -1,21 +1,11 @@
 #!/bin/env python
 
 from nose.tools import assert_equals
-from interpol import Interpolate
+from interpol import Interpolate, linear_interpolator, enumerate_successively
+from preggy import expect
 
 import random
 random.seed()
-
-def assert_iterator_equals(left, right):
-    left_list = list(left)
-    right_list = list(right)
-    print(left_list)
-    print(right_list)
-    assert len(left_list) == len(right_list)
-    assert all(map(lambda pair: pair[0] == pair[1], zip(left_list, right_list)))
-
-def list_enumerate(*l):
-    return list(enumerate(l))
 
 def probabilistic_random(*pairs):
     assert sum(map(lambda pair: pair[1], pairs)) == 1
@@ -35,57 +25,32 @@ def random_sample(size=50, min=-10, max=10):
 
 class TestInterpolate(object):
 
-    # Assert that no exception is raised when interpolating
-    def assert_exception_not_raised(self, sample):
-        try:
-            interpolated_sample = self.interpolate(sample)
-        except:
-            #raise
-            assert False
-    
-    def assert_interpolation_identity(self, sample):
-        assert_iterator_equals(self.interpolate(sample), sample)
-            
-    # We recreate a new Interpolate object each time
-    def setup(self):
-        self.interpolate = Interpolate(1, 5, 1)
+    # We first test the
+    def test_enumerate_successively(self):
+        expect(list(enumerate_successively([0], [1, 2], [3]))).to_equal([[(0, 0)], [(1, 1), (2, 2)], [(3, 3)]])
 
-    # Test that no exception is raised
-    def test_exception_not_raised(self):
-        for sample in [random_sample() for _ in range(0, 100)]:
-            yield self.assert_exception_not_raised, sample
+    def test_linear_interpolator(self):
+        expect(linear_interpolator([1], [None, None, None], [5])).to_equal([[1], [2, 3, 4], [5]])
 
-    # Test interpolation on only one partition
-    def test_interpolate_one_partition(self):
-        samples = [
-                list(range(1, 100)), 
-                list(range(1, 2)), 
-                [None] * 100, 
-                [None] * 2
-            ]
-        for sample in map(lambda sample: list(enumerate(sample)), samples):
-            yield self.assert_interpolation_identity, sample
+    def test_interpolate(self):
+        interpolate = Interpolate(2, 3)
+        expect(list(interpolate([1, 2, 3, None, None, None, 7, 8]))).to_equal([1, 2, 3, 4, 5, 6, 7, 8])
+        
+        interpolate = Interpolate(2, 3)
+        input =  [1, 2, None, None, 5, 6, 7, None, None, 10, None, None, None, None, 15, 16, 17, None, None, None, None]
+        output = [1, 2,    3,    4, 5, 6, 7, None, None, 10, None, None, None, None, 15, 16, 17, None, None, None, None]
+        expect([round(n) if n is not None else None for n in interpolate(input)]).to_equal(output)
 
-    def test_interpolate_two_partitions_1(self):
-        assert_iterator_equals(
-                self.interpolate(list_enumerate(None, 2)), 
-                list_enumerate(None, 2)
-            )
-    def test_interpolate_two_partitions_2(self):
-        assert_iterator_equals(
-                self.interpolate(enumerate([None] * 10 + [11])), 
-                enumerate([None] * 10 + [11])
-            )
- 
+'''
     def test_interpolate_two_partitions_3(self):
-        assert_iterator_equals(
-                Interpolate(2, 3, 2)(enumerate([1] + [None] * 10 + [2, 3, 4, 5] + [None] * 5 + [6, 7, 8, 9])), 
+        expect(
+                Interpolate(2, 3)(enumerate([1] + [None] * 10 + [2, 3, 4, 5] + [None] * 5 + [6, 7, 8, 9])), 
                 enumerate([1] + [None] * 10 + [2, 3, 4, 5]+ [None] * 5 + [6, 7, 8, 9])
             )
     
     def test_interpolate_two_partitions_4(self):
         assert_iterator_equals(
-                Interpolate(2, 3, 2)(enumerate([1, 2] + [None] * 10 + [3, 4, 5, 6])), 
+                Interpolate(2, 3)(enumerate([1, 2] + [None] * 10 + [3, 4, 5, 6])), 
                 enumerate([1, 2] + [None] * 10 + [3, 4, 5, 6])
             )
 
@@ -109,12 +74,13 @@ class TestInterpolate(object):
     
     def test_interpolate_three_partitions_3(self):
         assert_iterator_equals(
-                Interpolate(3, 3, 3)(list_enumerate(1, 2, 3, None, None, None, 7, None, 8)), 
+                Interpolate(3, 3)(list_enumerate(1, 2, 3, None, None, None, 7, None, 8)), 
                 list_enumerate(1, 2, 3, None, None, None, 7, None, 8)
             )
             
     def test_interpolate_three_partitions_4(self):
         assert_iterator_equals(
-                Interpolate(2, 3, 2)(enumerate([1, 2, None, None, 5, None, 7, 8, None, 10, 11, None])), 
+                Interpolate(2, 3)(enumerate([1, 2, None, None, 5, None, 7, 8, None, 10, 11, None])), 
                 enumerate([1, 2, None, None, 5, None, 7, 8, 9, 10, 11, None])
             )
+'''
