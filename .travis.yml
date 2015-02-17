@@ -23,5 +23,4 @@ script: nosetests --with-coverage --cover-package interpol
 after_success:
   - which nosetests
   - export PATH=/home/travis/miniconda3/bin:$PATH
-  - coveralls 
-
+  - coveralls
