@@ -86,7 +86,6 @@ class Interpolate(object):
         context = kwargs["context"]
         if context is Context.INSIDE_LOOP:
             item = args[0]
-            print(item)
             if self.__state is State.NO_PRESENT_ITEM_HAVE_BEEN_APPENDED_YET:
                 if item.is_absent():
                     self.__state = State.NO_PRESENT_ITEM_HAVE_BEEN_APPENDED_YET # We can only yield them and continue
@@ -98,6 +97,9 @@ class Interpolate(object):
                 if item.is_present():
                     self.__state = State.APPENDING_PRESENT_ITEMS_BEFORE_ABSENT_ITEMS
                     self.__items.append(item)
+                    while len(self.__items) > self.__minimal_present_item_count:
+                        self.__items.pop(0)
+
                     yield item
                 elif item.is_absent():
                     self.__state = State.APPENDING_ABSENT_ITEMS
@@ -113,7 +115,6 @@ class Interpolate(object):
                     self.__items.append(item)
                     present_items_before, absent_items = partition(boundary_matcher, self.__items)
                     if len(absent_items) > self.__maximal_absent_item_count:
-                        print(" ---> " + str(absent_items))
                         yield from absent_items
                         self.__items.clear()
                         self.__state = State.NO_PRESENT_ITEM_HAVE_BEEN_APPENDED_YET
